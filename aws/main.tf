@@ -60,10 +60,42 @@ resource "aws_instance" "worker_instance" {
   # Add other necessary configurations
   tags = {
     Name = "k8s-worker-${count.index}"
+
   }
 }
 
-# Create a test instance
+
+resource "null_resource" "docker_null_tag" {
+  count = var.num_worker_nodes
+
+  triggers = {
+    aws_vm_name = aws_instance.worker_instance[count.index].tags.Name
+    test_var     = var.test_var
+  }
+}
+
+locals {
+  valid_instances = {
+    for idx in range(var.num_worker_nodes) :
+    aws_instance.worker_instance[idx].tags.Name => aws_instance.worker_instance[idx]
+    if contains(var.valid_wn_names, aws_instance.worker_instance[idx].tags.Name)
+  }
+}
+
+
+
+resource "null_resource" "conditional_null_resource" {
+  for_each = local.valid_instances
+
+  triggers = {
+    aws_vm_name = each.value.tags.Name
+    test_var     = var.test_var
+  }
+}
+
+
+
+# Create a  instance
 resource "aws_instance" "test_instance" {
   ami           = "ami-0c55b159cbfafe1f0"
   instance_type = "t2.micro"
