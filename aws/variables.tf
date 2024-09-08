@@ -19,7 +19,7 @@ variable "public_master_subnet_cidr" {
 }
 
 variable "num_master_nodes" {
-  default = 3
+  default = 6
 }
 
 variable "num_worker_nodes" {
