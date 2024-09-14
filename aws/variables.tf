@@ -26,3 +26,12 @@ variable "num_worker_nodes" {
   default = 8
 }
 
+variable "test_var" {
+  default = true
+}
+
+variable "valid_wn_names" {
+  type    = list(string)
+  default = ["k8s-worker-7", "valid-name-2", "valid-name-3"]
+}
+

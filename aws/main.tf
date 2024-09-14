@@ -1,32 +1,3 @@
-provider "aws" {
-  region                      = var.aws_region
-  access_key                  = var.access_key
-  secret_key                  = var.secret_key
-  skip_credentials_validation = true
-  skip_metadata_api_check     = true
-  skip_requesting_account_id  = true
-  endpoints {
-    apigateway     = "http://localhost:4566"
-    cloudformation = "http://localhost:4566"
-    cloudwatch     = "http://localhost:4566"
-    dynamodb       = "http://localhost:4566"
-    es             = "http://localhost:4566"
-    firehose       = "http://localhost:4566"
-    iam            = "http://localhost:4566"
-    kinesis        = "http://localhost:4566"
-    lambda         = "http://localhost:4566"
-    route53        = "http://localhost:4566"
-    redshift       = "http://localhost:4566"
-    s3             = "http://localhost:4566"
-    secretsmanager = "http://localhost:4566"
-    ses            = "http://localhost:4566"
-    sns            = "http://localhost:4566"
-    sqs            = "http://localhost:4566"
-    ssm            = "http://localhost:4566"
-    stepfunctions  = "http://localhost:4566"
-    sts            = "http://localhost:4566"
-  }
-}
 
 # Create a VPC
 resource "aws_vpc" "main" {
@@ -89,10 +60,42 @@ resource "aws_instance" "worker_instance" {
   # Add other necessary configurations
   tags = {
     Name = "k8s-worker-${count.index}"
+
   }
 }
 
-# Create a test instance
+
+resource "null_resource" "docker_null_tag" {
+  count = var.num_worker_nodes
+
+  triggers = {
+    aws_vm_name = aws_instance.worker_instance[count.index].tags.Name
+    test_var     = var.test_var
+  }
+}
+
+locals {
+  valid_instances = {
+    for idx in range(var.num_worker_nodes) :
+    aws_instance.worker_instance[idx].tags.Name => aws_instance.worker_instance[idx]
+    if contains(var.valid_wn_names, aws_instance.worker_instance[idx].tags.Name)
+  }
+}
+
+
+
+resource "null_resource" "conditional_null_resource" {
+  for_each = local.valid_instances
+
+  triggers = {
+    aws_vm_name = each.value.tags.Name
+    test_var     = var.test_var
+  }
+}
+
+
+
+# Create a  instance
 resource "aws_instance" "test_instance" {
   ami           = "ami-0c55b159cbfafe1f0"
   instance_type = "t2.micro"
