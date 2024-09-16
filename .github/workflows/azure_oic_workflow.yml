@@ -23,3 +23,10 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         federated-token: ${{ steps.github-token.outputs.token }}
+    - name: Run Terraform Plan
+      working-directory: ./Azure  # Navigate to the Azure folder
+      run: |
+        terraform init  # Initialize Terraform
+        terraform plan  # Run Terraform plan
+    
+    
