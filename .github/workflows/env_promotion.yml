@@ -13,6 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Trigger Terraform Execution Workflow
-      uses: ./.github/workflows/action.yml  # Point to Workflow B
+      uses: ./.github/actions/action.yml  # Point to Workflow B
       with:
         env: ${{ github.event.inputs.environment }}  # Pass environment to Workflow B
