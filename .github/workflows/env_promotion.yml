@@ -12,6 +12,8 @@ jobs:
   trigger:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
     - name: Trigger Terraform Execution Workflow
       uses: ./.github/actions/deploy-Azure-resources  # Point to Workflow B
       with:
