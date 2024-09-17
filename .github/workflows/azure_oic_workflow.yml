@@ -28,5 +28,8 @@ jobs:
       run: |
         terraform init  # Initialize Terraform
         terraform plan  # Run Terraform plan
+        terraform apply
+        sleep 100
+        terraform destroy
     
     
