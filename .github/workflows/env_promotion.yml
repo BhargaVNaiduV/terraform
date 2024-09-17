@@ -1,0 +1,18 @@
+name: Deploy Terraform via Azure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (DEV or PROD)'
+        required: true
+        default: 'DEV'
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Trigger Terraform Execution Workflow
+      uses: ./.github/workflows/azure-terraform-deploy.yml  # Point to Workflow B
+      with:
+        env: ${{ github.event.inputs.environment }}  # Pass environment to Workflow B

@@ -3,7 +3,7 @@ name: Azure Login with OIDC
 on:
   push:
     branches:
-      - main  # Trigger only on push to main branch
+      - feature/* 
 
 permissions:
   id-token: write
@@ -28,8 +28,8 @@ jobs:
       run: |
         terraform init  # Initialize Terraform
         terraform plan  # Run Terraform plan
-        terraform apply
-        sleep 100
-        terraform destroy
+        # terraform apply
+        # sleep 100
+        # terraform destroy
     
     
