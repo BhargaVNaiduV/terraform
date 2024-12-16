@@ -1,25 +1,23 @@
 name: Azure Terraform Workflow
 
 on:
-  pull_request:
-    branches:
-      - main
-      - feature/*
+  issue_comment:
     types:
-      - opened
-      - synchronize
+      - created  # Trigger only when a comment is created
+
 permissions:
   id-token: write  # Required for Azure Login with OIDC
   contents: read
 
 jobs:
   AzureTerraform:
+    if: ${{ github.event.issue.pull_request && github.event.comment.body.startsWith('plan') && github.event.issue.pull_request.base.ref == 'main' }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
       with:
-        ref: ${{ github.head_ref }}  # Checkout the feature branch from the pull request
+        ref: ${{ github.event.pull_request.head.ref }}  # Checkout the branch associated with the pull request
 
     - name: Azure Login
       uses: azure/login@v1
@@ -29,7 +27,7 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Run Terraform Plan
-      working-directory: ./Azure  # Navigate to the Azure  folder
+      working-directory: ./Azure  # Navigate to the Azure folder
       id: terraform
       run: |
         terraform init  # Initialize Terraform
@@ -37,7 +35,6 @@ jobs:
         echo "::set-output name=tf_summary::$(terraform show -json tfplan | jq -r '.resource_changes[] | select(.change.actions[] == "create" or .change.actions[] == "delete") | "\(.address): \(.change.actions)"')"  # Extract plan summary
 
     - name: Comment on PR with Terraform Plan Summary
-      if: contains(github.event.pull_request.body, 'plan')
       uses: actions/github-script@v3
       with:
         script: |
@@ -49,12 +46,4 @@ jobs:
             issue_number: context.issue.number,
             body: `Terraform plan summary:\n${tfSummary}`
           });
-
-    - name: Terraform Destroy
-      working-directory: ./Azure  # Ensure the correct directory
-      if: success() && contains(github.event.pull_request.body, 'destroy')
-      run: |
-        terraform destroy -auto-approve  # Run Terraform destroy
-
-    
-    
+        tf_summary: ${{ steps.terraform.outputs.tf_summary }}
