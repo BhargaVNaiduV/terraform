@@ -3,6 +3,11 @@ name: Azure Terraform Workflow
 on:
   issue_comment:
     types:
+      - opened
+      - synchronize
+permissions:
+  id-token: write  # Required for Azure Login with OIDC
+  contents: read
       - created  # Trigger only when a comment is created
 
 permissions:
