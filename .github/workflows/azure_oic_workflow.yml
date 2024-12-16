@@ -33,18 +33,13 @@ jobs:
       run: |
         terraform init  # Initialize Terraform
         terraform plan -out=tfplan  # Generate a Terraform plan
-        echo "::set-output name=tf_summary::$(terraform show -json tfplan | jq -r '.resource_changes[] | select(.change.actions[] == "create" or .change.actions[] == "delete") | "\(.address): \(.change.actions)"')"  # Extract plan summary
-
-    - name: Comment on PR with Terraform Plan Summary
-      uses: actions/github-script@v3
+        tf_summary=$(terraform show -json tfplan | jq -r '.resource_changes[] | select(.change.actions[] | contains(["create", "delete"])) | "\(.address): \(.change.actions)"')
+        echo "TF_SUMMARY=$tf_summary" >> $GITHUB_ENV
+  
+    - name: Comment on Pull Request
+      uses: mshick/add-pr-comment@v2
       with:
-        script: |
-          const tfSummary = core.getInput('tf_summary');
-          const octokit = new github.getOctokit(process.env.GITHUB_TOKEN);
-          await octokit.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body: `Terraform plan summary:\n${tfSummary}`
-          });
-        tf_summary: ${{ steps.terraform.outputs.tf_summary }}
+        message: |
+          ### Terraform Plan Summary
+          ${{ env.TF_SUMMARY }}
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
