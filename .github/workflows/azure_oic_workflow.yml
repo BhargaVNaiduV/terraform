@@ -46,8 +46,6 @@ jobs:
             issue_number: context.issue.number,
             body: `Terraform plan summary:\n${tfSummary}`
           });
-      with:
-        tf_summary: ${{ steps.terraform.outputs.tf_summary }}
 
     - name: Terraform Destroy
       working-directory: ./Azure  # Ensure the correct directory
