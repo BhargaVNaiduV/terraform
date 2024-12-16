@@ -33,7 +33,7 @@ jobs:
       run: |
         terraform init  # Initialize Terraform
         terraform plan -out=tfplan  # Generate a Terraform plan
-        tf_summary=$(terraform show -json tfplan | jq -r '.resource_changes[] | select(.change.actions[] | contains(["create", "delete"])) | "\(.address): \(.change.actions)"')
+        tf_summary=$(terraform show -json tfplan )
         echo "TF_SUMMARY=$tf_summary" >> $GITHUB_ENV
   
     - name: Comment on Pull Request
