@@ -1,14 +1,13 @@
-name: Azure Login with OIDC
+name: Azure Terraform Workflow
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/* 
       - main
-
-permissions:
-  id-token: write
-  contents: read
+      - feature/*
+    types:
+      - opened
+      - synchronize
 
 jobs:
   AzureTerraform:
@@ -16,6 +15,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}  # Checkout the feature branch from the pull request
 
     - name: Azure Login
       uses: azure/login@v1
@@ -23,13 +24,36 @@ jobs:
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
     - name: Run Terraform Plan
       working-directory: ./Azure  # Navigate to the Azure folder
+      id: terraform
       run: |
         terraform init  # Initialize Terraform
-        terraform plan  # Run Terraform plan
-        # terraform apply
-        # sleep 100
-        # terraform destroy
+        terraform plan -out=tfplan  # Generate a Terraform plan
+        echo "::set-output name=tf_summary::$(terraform show -json tfplan | jq -r '.resource_changes[] | select(.change.actions[] == "create" or .change.actions[] == "delete") | "\(.address): \(.change.actions)"')"  # Extract plan summary
+
+    - name: Comment on PR with Terraform Plan Summary
+      if: contains(github.event.pull_request.body, 'plan')
+      uses: actions/github-script@v3
+      with:
+        script: |
+          const tfSummary = core.getInput('tf_summary');
+          const octokit = new github.getOctokit(process.env.GITHUB_TOKEN);
+          await octokit.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `Terraform plan summary:\n${tfSummary}`
+          });
+      with:
+        tf_summary: ${{ steps.terraform.outputs.tf_summary }}
+
+    - name: Terraform Destroy
+      working-directory: ./Azure  # Ensure the correct directory
+      if: success() && contains(github.event.pull_request.body, 'destroy')
+      run: |
+        terraform destroy -auto-approve  # Run Terraform destroy
+
     
     
