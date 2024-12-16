@@ -27,7 +27,7 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Run Terraform Plan
-      working-directory: ./Azure  # Navigate to the Azure folder
+      working-directory: ./Azure  # Navigate to the Azure  folder
       id: terraform
       run: |
         terraform init  # Initialize Terraform
