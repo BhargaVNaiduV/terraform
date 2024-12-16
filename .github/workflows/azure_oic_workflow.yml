@@ -8,6 +8,9 @@ on:
     types:
       - opened
       - synchronize
+permissions:
+  id-token: write  # Required for Azure Login with OIDC
+  contents: read
 
 jobs:
   AzureTerraform:
