@@ -8,7 +8,7 @@ This repository contains a GitHub Actions workflow to deploy Azure resources usi
 
 ### **Trigger**
 The workflow is triggered on a `push` event to the following branches:
-- Any branch under the `feature/` prefix.
+- Any branch under the `feature/` prefix .
 - The `main` branch.
 
 ### **Key Features**
