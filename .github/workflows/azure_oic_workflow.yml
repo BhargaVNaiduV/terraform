@@ -4,6 +4,9 @@ on:
   issue_comment:
     types:
       - created
+permissions:
+  contents: write  # Enable write access for the GITHUB_TOKEN
+  pull-requests: write
 
 jobs:
   terraform-plan:
