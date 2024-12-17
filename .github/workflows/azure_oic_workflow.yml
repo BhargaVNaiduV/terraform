@@ -43,3 +43,5 @@ jobs:
           ### Terraform Plan Summary
           ${{ env.TF_SUMMARY }}
         repo-token: ${{ secrets.GITHUB_TOKEN }}
+        repo-owner: ${{ github.repository_owner }}
+        repo-name: ${{ github.event.repository.name }}
