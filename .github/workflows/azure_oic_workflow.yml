@@ -36,12 +36,12 @@ jobs:
         tf_summary=$(terraform show -json tfplan )
         echo "TF_SUMMARY=$tf_summary" >> $GITHUB_ENV
   
-    - name: Comment on Pull Request
-      uses: mshick/add-pr-comment@v2
-      with:
-        message: |
-          ### Terraform Plan Summary
-          ${{ env.TF_SUMMARY }}
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        repo-owner: ${{ github.repository_owner }}
-        repo-name: ${{ github.event.repository.name }}
+    # - name: Comment on Pull Request
+    #   uses: mshick/add-pr-comment@v2
+    #   with:
+    #     message: |
+    #       ### Terraform Plan Summary
+    #       ${{ env.TF_SUMMARY }}
+    #     repo-token: ${{ secrets.GITHUB_TOKEN }}
+    #     repo-owner: ${{ github.repository_owner }}
+    #     repo-name: ${{ github.event.repository.name }}
