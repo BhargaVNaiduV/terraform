@@ -1,0 +1,86 @@
+name: Terraform Wordpress workflow
+
+on:
+  issue_comment:
+    types:
+      - created
+permissions:
+  contents: write  # Enable write access for the GITHUB_TOKEN
+  pull-requests: write
+
+jobs:
+  terraform-plan:
+    if: >
+      github.event.issue.pull_request && 
+      (github.event.pull_request.merged == true || startsWith(github.event.comment.body, 'terraform plan wordpress'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run Terraform Plan
+        working-directory: ./Azure/Wordpress
+        id: terraform-plan
+        run: |
+          terraform init
+          terraform plan -out=tfplan
+          tf_summary=$(terraform show -json tfplan)
+          echo "TF_SUMMARY=$tf_summary" >> $GITHUB_ENV
+
+  terraform-apply:
+    if: >
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, 'terraform apply wordpress')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run Terraform Apply
+        working-directory: ./Azure/Wordpress
+        run: |
+          terraform init
+          terraform plan
+          terraform apply -auto-approve
+
+  terraform-destroy:
+    if: >
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, 'terraform destroy wordpress')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run Terraform Destroy
+        working-directory: ./Azure/Wordpress
+        run: |
+          terraform init
+          terraform destroy -auto-approve
