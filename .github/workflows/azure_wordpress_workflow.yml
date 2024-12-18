@@ -5,8 +5,8 @@ on:
     types:
       - created
 permissions:
-  contents: write  # Enable write access for the GITHUB_TOKEN
-  pull-requests: write
+  id-token: write
+  contents: read
 
 jobs:
   terraform-plan:
