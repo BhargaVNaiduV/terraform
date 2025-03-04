@@ -1,0 +1,12 @@
+name: SetupAWSTerraform
+description: "Action used to setup and deploy to azure"
+inputs:
+  environment:
+    description: "Environment (DEV or PROD)"
+    required: true
+  working-directory:
+    description: "Dir where Aws code is present"
+runs:
+  using: "docker"
+  image: ${{ inputs.environment_image_name }}
+  
