@@ -1,25 +1,19 @@
-name: Execute Azure Terraform Plan
-
-on:
-  workflow_call:
-    inputs:
-      env:
-        description: 'Environment (DEV or PROD)'
-        required: true
-        type: string
-
-permissions:
-  id-token: write
-  contents: read
-
-jobs:
-  terraformExecution:
-    runs-on: ubuntu-latest
-    steps:
+name: SetupAzureTerraform
+description: "Action used to setup and deploy to azure"
+inputs:
+  env:
+    description: "Environment (DEV or PROD)"
+    required: true
+  working-directory:
+    description: "Dir where Azure code is present"
+runs:
+  using: composite
+  steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses:  actions/checkout@v4
 
     - name: Set Environment-Specific Azure Credentials
+      shell: bash
       run: |
         echo "AZURE_CLIENT_ID=${{ secrets[format('{0}_AZURE_CLIENT_ID', inputs.env)] }}" >> $GITHUB_ENV
         echo "AZURE_TENANT_ID=${{ secrets[format('{0}_AZURE_TENANT_ID', inputs.env)] }}" >> $GITHUB_ENV
@@ -33,7 +27,8 @@ jobs:
         subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
 
     - name: Run Terraform Plan
-      working-directory: ./Azure  # Navigate to the Azure folder
+      shell: bash
+      working-directory: "${{inputs.working-directory}}/Azure"
       run: |
         terraform init  # Initialize Terraform
         terraform plan  # Run Terraform plan
