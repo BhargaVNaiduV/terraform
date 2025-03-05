@@ -1,0 +1,44 @@
+name: TerraformWorkflow
+on:
+ push:
+  branches:
+   - main
+   - feature/*
+permissions:
+    issues: write
+    actions: write
+    id-tokens: write
+
+jobs:
+  terraform_plan:
+   runs-on: self-hosted  
+   steps:
+    - name: Code Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+    - name: Setup Terraform
+      uses: hashcrop/terraformsetup
+    - name: setup terraform
+      shell: bash
+      working-directory: /Aws
+      run: |
+        terraform init
+  terraform_apply:
+   if: 
+     ( ${{github.ref}} == "/ref/heads/main" )
+   runs-on: self-hosted
+   steps:
+    - name: sample test
+      shell: bash
+      run: |
+        whoami
+
+
+    
+
+
+        
+
+
+

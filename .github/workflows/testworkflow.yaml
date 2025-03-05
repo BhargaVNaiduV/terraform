@@ -1,0 +1,22 @@
+name: Reusabletest
+on:
+  push:
+    branches:
+      - main
+permissions:
+    issues: write
+    events: write
+jobs:
+  build:
+    runs-on: self-hosted
+    container:
+      image: aws."ECR image"
+      credentials:
+        username: "aws"
+        password: ${{ secrects.ecr_password }}
+      env:
+        log-level: ${{ inputs.LogLevel}}
+      volume:
+        /mnt/share: ${{ github.workspace }}
+
+        
