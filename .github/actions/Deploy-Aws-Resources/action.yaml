@@ -9,4 +9,8 @@ inputs:
 runs:
   using: "docker"
   image: ${{ inputs.environment_image_name }}
+  args:
+    - ${{ inputs.user_input }}
+  
+
   
